@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.http.MediaType;
 
+import uy.lstabile.paymentchain.customerapi.api.model.CustomerModelAssembler;
 import uy.lstabile.paymentchain.customerapi.controller.CustomerController;
 import uy.lstabile.paymentchain.customerapi.entities.Customer;
 import uy.lstabile.paymentchain.customerapi.repository.CustomerRepository;
@@ -17,7 +18,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.Arrays;
@@ -29,7 +29,10 @@ class CustomerControllerUnitTests {
     private MockMvc mockMvc;
 
     @MockBean
-    private CustomerRepository customerRepository;
+    private CustomerRepository repository;
+
+    @MockBean
+    private CustomerModelAssembler assembler;
 
     private static Customer customer = null;
 
@@ -39,16 +42,20 @@ class CustomerControllerUnitTests {
     }
 
     @Test
-    void getACustomer() throws Exception {
+    void getAllCustomersTest() throws Exception {
 
-        when(customerRepository.findAll()).thenReturn(
+        when(repository.findAll()).thenReturn(
                 Arrays.asList(customer));
 
-        mockMvc.perform(get("/customer/"))
+        when(assembler.toModel(customer)).thenReturn(
+            EntityModel.of(customer)
+        );
+
+        mockMvc.perform(get("/customers/"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id", is(0)))
-                .andExpect(jsonPath("$[0].name").value("Luis"));
+                .andExpect(jsonPath(
+                        "_embedded.customerList[0].id", is(0)))
+                .andExpect(jsonPath("_embedded.customerList[0].name").value("Luis"));
     }
 }

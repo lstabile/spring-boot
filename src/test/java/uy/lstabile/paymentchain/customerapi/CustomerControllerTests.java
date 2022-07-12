@@ -2,16 +2,15 @@ package uy.lstabile.paymentchain.customerapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import uy.lstabile.paymentchain.customerapi.entities.Customer;
-import uy.lstabile.paymentchain.customerapi.exception.CustomerNotFoundException;
 
 import org.springframework.http.MediaType;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest()
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 class CustomerControllerTests {
 
     @Autowired
@@ -41,7 +41,7 @@ class CustomerControllerTests {
     @Test
     public void getListTest() throws Exception {
         mockMvc.perform(
-                post("/customer/")
+                post("/customers/")
                         .content(asJsonString(new Customer("name", "phone")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -49,16 +49,16 @@ class CustomerControllerTests {
                 .andExpect(status().isCreated());
 
         mockMvc.perform(
-                get("/customer/"))
+                get("/customers/"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id").exists());
+                .andExpect(jsonPath("_embedded.customerList[0].id").exists());
     }
 
     @Test
     public void getTest() throws Exception {
 
-        mockMvc.perform(get("/customer/{id}", 1)
+        mockMvc.perform(get("/customers/{id}", 1)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ class CustomerControllerTests {
 
         long id = 99;
 
-        mockMvc.perform(get("/customer/{id}", id)
+        mockMvc.perform(get("/customers/{id}", id)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -80,7 +80,7 @@ class CustomerControllerTests {
     public void saveTest() throws Exception {
 
         mockMvc.perform(
-                post("/customer/")
+                post("/customers/")
                         .content(asJsonString(new Customer("name", "phone")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -96,7 +96,7 @@ class CustomerControllerTests {
         Customer customer = new Customer("name2", "phone2");
 
         mockMvc.perform(
-                put("/customer/{id}", 1)
+                put("/customers/{id}", 1)
                         .content(asJsonString(customer))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -111,7 +111,7 @@ class CustomerControllerTests {
     @Test
     public void deleteTest() throws Exception {
 
-        mockMvc.perform(delete("/customer/{id}", 1)
+        mockMvc.perform(delete("/customers/{id}", 1)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNoContent());
@@ -122,7 +122,7 @@ class CustomerControllerTests {
 
         long id = 99;
 
-        mockMvc.perform(delete("/customer/{id}", id)
+        mockMvc.perform(delete("/customers/{id}", id)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
