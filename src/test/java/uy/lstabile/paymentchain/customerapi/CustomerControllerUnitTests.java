@@ -51,7 +51,7 @@ class CustomerControllerUnitTests {
             EntityModel.of(customer)
         );
 
-        mockMvc.perform(get("/customers/"))
+        mockMvc.perform(get("/api/customers/"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(

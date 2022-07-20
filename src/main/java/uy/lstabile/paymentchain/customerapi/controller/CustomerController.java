@@ -26,18 +26,18 @@ import uy.lstabile.paymentchain.customerapi.api.model.CustomerModelAssembler;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("/api/customers")
 public class CustomerController {
 
     @Autowired
-    private CustomerRepository repository;
+    private CustomerRepository customerRepository;
 
     @Autowired
     private CustomerModelAssembler assembler;
 
     @GetMapping()
     public ResponseEntity<CollectionModel<EntityModel<Customer>>> list() {
-        List<EntityModel<Customer>> customerList = repository.findAll().stream()
+        List<EntityModel<Customer>> customerList = customerRepository.findAll().stream()
                 .map(assembler::toModel).collect(Collectors.toList());
 
         CollectionModel<EntityModel<Customer>> collectionModel = CollectionModel.of(customerList,
@@ -49,7 +49,7 @@ public class CustomerController {
     @GetMapping(value = "/{id}")
     public ResponseEntity<EntityModel<Customer>> get(@PathVariable("id") long id) throws CustomerNotFoundException {
 
-        Customer customer = repository.findById(id)
+        Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
 
         EntityModel<Customer> entityModel = assembler.toModel(customer);
@@ -59,7 +59,7 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<EntityModel<Customer>> save(@RequestBody Customer input) {
-        Customer customer = repository.save(input);
+        Customer customer = customerRepository.save(input);
 
         EntityModel<Customer> entityModel = assembler.toModel(customer);
 
@@ -69,7 +69,7 @@ public class CustomerController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<EntityModel<Customer>> update(@PathVariable Long id, @RequestBody Customer input)
             throws CustomerNotFoundException {
-        Customer editedCustomer = repository.findById(id)
+        Customer editedCustomer = customerRepository.findById(id)
                 .map(customer -> {
                     customer.setName(input.getName());
                     customer.setPhone(input.getPhone());
@@ -79,7 +79,7 @@ public class CustomerController {
                 .orElseThrow(
                         () -> new CustomerNotFoundException(id));
 
-        editedCustomer = repository.save(editedCustomer);
+        editedCustomer = customerRepository.save(editedCustomer);
 
         EntityModel<Customer> entityModel = assembler.toModel(editedCustomer);
 
@@ -91,7 +91,7 @@ public class CustomerController {
             throws CustomerNotFoundException {
 
         try {
-            repository.deleteById(id);
+            customerRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             throw new CustomerNotFoundException(id);
         }

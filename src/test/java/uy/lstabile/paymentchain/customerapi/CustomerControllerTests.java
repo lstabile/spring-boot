@@ -41,7 +41,7 @@ class CustomerControllerTests {
     @Test
     public void getListTest() throws Exception {
         mockMvc.perform(
-                post("/customers/")
+                post("/api/customers/")
                         .content(asJsonString(new Customer("name", "phone")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -49,7 +49,7 @@ class CustomerControllerTests {
                 .andExpect(status().isCreated());
 
         mockMvc.perform(
-                get("/customers/"))
+                get("/api/customers/"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("_embedded.customerList[0].id").exists());
@@ -58,7 +58,7 @@ class CustomerControllerTests {
     @Test
     public void getTest() throws Exception {
 
-        mockMvc.perform(get("/customers/{id}", 1)
+        mockMvc.perform(get("/api/customers/{id}", 1)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ class CustomerControllerTests {
 
         long id = 99;
 
-        mockMvc.perform(get("/customers/{id}", id)
+        mockMvc.perform(get("/api/customers/{id}", id)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -80,7 +80,7 @@ class CustomerControllerTests {
     public void saveTest() throws Exception {
 
         mockMvc.perform(
-                post("/customers/")
+                post("/api/customers/")
                         .content(asJsonString(new Customer("name", "phone")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -96,7 +96,7 @@ class CustomerControllerTests {
         Customer customer = new Customer("name2", "phone2");
 
         mockMvc.perform(
-                put("/customers/{id}", 1)
+                put("/api/customers/{id}", 1)
                         .content(asJsonString(customer))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -111,7 +111,7 @@ class CustomerControllerTests {
     @Test
     public void deleteTest() throws Exception {
 
-        mockMvc.perform(delete("/customers/{id}", 1)
+        mockMvc.perform(delete("/api/customers/{id}", 1)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNoContent());
@@ -122,7 +122,7 @@ class CustomerControllerTests {
 
         long id = 99;
 
-        mockMvc.perform(delete("/customers/{id}", id)
+        mockMvc.perform(delete("/api/customers/{id}", id)
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
